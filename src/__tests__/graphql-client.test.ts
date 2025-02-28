@@ -405,42 +405,69 @@ describe('LinearGraphQLClient', () => {
       );
     });
 
-    it('should update multiple issues with a single mutation', async () => {
-      const mockResponse = {
+    it('should update multiple issues sequentially', async () => {
+      // Mock response for first issue update
+      const mockResponse1 = {
         data: {
           issueUpdate: {
             success: true,
-            issues: [
-              {
-                id: 'issue-1',
-                identifier: 'TEST-1',
-                title: 'Updated Issue 1',
-                url: 'https://linear.app/test/issue/TEST-1'
-              },
-              {
-                id: 'issue-2',
-                identifier: 'TEST-2',
-                title: 'Updated Issue 2',
-                url: 'https://linear.app/test/issue/TEST-2'
-              }
-            ]
+            issue: {
+              id: 'issue-1',
+              identifier: 'TEST-1',
+              title: 'Updated Issue 1',
+              url: 'https://linear.app/test/issue/TEST-1',
+              state: { name: 'Done' }
+            }
+          }
+        }
+      };
+      
+      // Mock response for second issue update
+      const mockResponse2 = {
+        data: {
+          issueUpdate: {
+            success: true,
+            issue: {
+              id: 'issue-2',
+              identifier: 'TEST-2',
+              title: 'Updated Issue 2',
+              url: 'https://linear.app/test/issue/TEST-2',
+              state: { name: 'Done' }
+            }
           }
         }
       };
 
-      mockRawRequest.mockResolvedValueOnce(mockResponse);
+      // Setup mocks for sequential calls
+      mockRawRequest.mockResolvedValueOnce(mockResponse1)
+                    .mockResolvedValueOnce(mockResponse2);
 
       const ids = ['issue-1', 'issue-2'];
       const updateInput: UpdateIssueInput = { stateId: 'state-2' };
       const result: UpdateIssuesResponse = await graphqlClient.updateIssues(ids, updateInput);
 
-      expect(result).toEqual(mockResponse.data);
-      // Verify single mutation call
-      expect(mockRawRequest).toHaveBeenCalledTimes(1);
-      expect(mockRawRequest).toHaveBeenCalledWith(
+      // Should return result from first update
+      expect(result).toEqual(mockResponse1.data);
+
+      // Verify multiple calls were made
+      expect(mockRawRequest).toHaveBeenCalledTimes(2);
+      
+      // Verify first call
+      expect(mockRawRequest).toHaveBeenNthCalledWith(
+        1,
         expect.any(String),
         expect.objectContaining({
-          ids,
+          id: 'issue-1',
+          input: updateInput
+        })
+      );
+      
+      // Verify second call
+      expect(mockRawRequest).toHaveBeenNthCalledWith(
+        2,
+        expect.any(String),
+        expect.objectContaining({
+          id: 'issue-2',
           input: updateInput
         })
       );
