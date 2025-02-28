@@ -9,7 +9,9 @@ import {
   UpdateIssuesResponse,
   SearchIssuesInput,
   SearchIssuesResponse,
-  DeleteIssueResponse
+  DeleteIssueResponse,
+  AddCommentInput,
+  AddCommentResponse
 } from '../features/issues/types/issue.types';
 import {
   ProjectInput,
@@ -545,6 +547,106 @@ describe('LinearGraphQLClient', () => {
       await expect(graphqlClient.getCurrentUser()).rejects.toThrow(
         'GraphQL operation failed: User fetch failed'
       );
+    });
+  });
+
+  describe('Comment Operations', () => {
+    it('should successfully add a comment to an issue', async () => {
+      const mockResponse = {
+        data: {
+          commentCreate: {
+            success: true,
+            comment: {
+              id: 'comment-1',
+              body: 'Test comment',
+              url: 'https://linear.app/test/issue/TEST-1#comment-1',
+              user: {
+                id: 'user-1',
+                name: 'Test User',
+                displayName: 'Test User'
+              },
+              createdAt: new Date().toISOString()
+            }
+          }
+        }
+      };
+
+      mockRawRequest.mockResolvedValueOnce(mockResponse);
+
+      const commentInput: AddCommentInput = {
+        issueId: 'issue-1',
+        body: 'Test comment'
+      };
+
+      const result: AddCommentResponse = await graphqlClient.addComment(commentInput);
+
+      expect(result).toEqual(mockResponse.data);
+      expect(mockRawRequest).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          input: {
+            issueId: 'issue-1',
+            body: 'Test comment',
+            parentId: undefined
+          }
+        })
+      );
+    });
+
+    it('should support threaded comments', async () => {
+      const mockResponse = {
+        data: {
+          commentCreate: {
+            success: true,
+            comment: {
+              id: 'comment-2',
+              body: 'Reply comment',
+              url: 'https://linear.app/test/issue/TEST-1#comment-2',
+              user: {
+                id: 'user-1',
+                name: 'Test User',
+                displayName: 'Test User'
+              },
+              createdAt: new Date().toISOString()
+            }
+          }
+        }
+      };
+
+      mockRawRequest.mockResolvedValueOnce(mockResponse);
+
+      const commentInput: AddCommentInput = {
+        issueId: 'issue-1',
+        body: 'Reply comment',
+        parentId: 'comment-1'
+      };
+
+      const result: AddCommentResponse = await graphqlClient.addComment(commentInput);
+
+      expect(result).toEqual(mockResponse.data);
+      expect(mockRawRequest).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          input: {
+            issueId: 'issue-1',
+            body: 'Reply comment',
+            parentId: 'comment-1'
+          }
+        })
+      );
+    });
+
+    it('should handle comment creation errors', async () => {
+      mockRawRequest.mockRejectedValueOnce(new Error('Comment creation failed'));
+
+      const commentInput: AddCommentInput = {
+        issueId: 'issue-1',
+        body: 'Test comment'
+      };
+
+      await expect(
+        graphqlClient.addComment(commentInput)
+      ).rejects.toThrow('GraphQL operation failed: Comment creation failed');
     });
   });
 

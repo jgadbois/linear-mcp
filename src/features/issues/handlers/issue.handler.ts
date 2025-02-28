@@ -10,11 +10,13 @@ import {
   SearchIssuesInput,
   DeleteIssueInput,
   DeleteIssuesInput,
+  AddCommentInput,
   CreateIssueResponse,
   CreateIssuesResponse,
   UpdateIssuesResponse,
   SearchIssuesResponse,
   DeleteIssueResponse,
+  AddCommentResponse,
   Issue,
 } from "../types/issue.types.js";
 import { TeamState } from "../../teams/types/team.types.js";
