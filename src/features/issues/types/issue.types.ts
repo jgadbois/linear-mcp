@@ -31,6 +31,14 @@ export interface BulkUpdateIssuesInput {
   update: UpdateIssueInput;
 }
 
+export interface AddCommentInput {
+  issueId: string;
+  body: string;
+  parentId?: string;
+  createAsUser?: string;
+  displayIconUrl?: string;
+}
+
 export interface SearchIssuesInput {
   query?: string;
   filter?: {
@@ -128,6 +136,24 @@ export interface DeleteIssueResponse {
   };
 }
 
+export interface Comment {
+  id: string;
+  body: string;
+  url: string;
+  user: {
+    name: string;
+    displayName: string;
+  };
+  createdAt: string;
+}
+
+export interface AddCommentResponse {
+  commentCreate: {
+    success: boolean;
+    comment?: Comment;
+  };
+}
+
 /**
  * Handler method types
  */
@@ -141,4 +167,5 @@ export interface IssueHandlerMethods {
   handleSearchIssues(args: SearchIssuesInput): Promise<BaseToolResponse>;
   handleDeleteIssue(args: DeleteIssueInput): Promise<BaseToolResponse>;
   handleDeleteIssues(args: DeleteIssuesInput): Promise<BaseToolResponse>;
+  handleAddComment(args: AddCommentInput): Promise<BaseToolResponse>;
 }

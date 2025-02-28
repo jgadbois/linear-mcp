@@ -86,6 +86,7 @@ The server currently supports the following operations:
 - ✅ Search issues with filtering
 - ✅ Associate issues with projects
 - ✅ Create parent/child issue relationships
+- ✅ Add comments to issues (with threaded replies support)
 
 ### Project Management
 - ✅ Create projects with associated issues
@@ -112,7 +113,7 @@ The server currently supports the following operations:
 The following features are currently being worked on:
 
 ### Issue Management
-- 🚧 Comment functionality (add/edit comments, threading)
+- 🚧 Edit/delete comment functionality
 - 🚧 Complex search filters
 - 🚧 Pagination support for large result sets
 

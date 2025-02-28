@@ -46,6 +46,7 @@ export class HandlerFactory {
       linear_search_issues: { handler: this.issueHandler, method: 'handleSearchIssues' },
       linear_delete_issue: { handler: this.issueHandler, method: 'handleDeleteIssue' },
       linear_delete_issues: { handler: this.issueHandler, method: 'handleDeleteIssues' },
+      linear_add_comment: { handler: this.issueHandler, method: 'handleAddComment' },
 
       // Project tools
       linear_create_project_with_issues: { handler: this.projectHandler, method: 'handleCreateProjectWithIssues' },

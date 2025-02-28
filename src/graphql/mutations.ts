@@ -88,3 +88,22 @@ export const CREATE_ISSUE_LABELS = gql`
     }
   }
 `;
+
+export const ADD_COMMENT_MUTATION = gql`
+  mutation AddComment($input: CommentCreateInput!) {
+    commentCreate(input: $input) {
+      success
+      comment {
+        id
+        body
+        url
+        user {
+          id
+          name
+          displayName
+        }
+        createdAt
+      }
+    }
+  }
+`;

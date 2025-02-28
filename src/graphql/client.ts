@@ -11,6 +11,8 @@ import {
   DeleteIssueResponse,
   Issue,
   IssueBatchResponse,
+  AddCommentInput,
+  AddCommentResponse,
 } from "../features/issues/types/issue.types.js";
 import {
   ProjectInput,
@@ -213,5 +215,21 @@ export class LinearGraphQLClient {
   async deleteIssues(ids: string[]): Promise<DeleteIssueResponse> {
     const { DELETE_ISSUES_MUTATION } = await import("./mutations.js");
     return this.execute<DeleteIssueResponse>(DELETE_ISSUES_MUTATION, { ids });
+  }
+
+  // Add a comment to an issue
+  async addComment(input: AddCommentInput): Promise<AddCommentResponse> {
+    const { ADD_COMMENT_MUTATION } = await import("./mutations.js");
+    
+    // Prepare the input for the GraphQL mutation
+    const commentInput = {
+      issueId: input.issueId,
+      body: input.body,
+      parentId: input.parentId,
+    };
+
+    return this.execute<AddCommentResponse>(ADD_COMMENT_MUTATION, { 
+      input: commentInput 
+    });
   }
 }

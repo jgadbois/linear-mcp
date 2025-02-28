@@ -259,4 +259,32 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
       this.handleError(error, "delete issues");
     }
   }
+
+  /**
+   * Adds a comment to an issue.
+   */
+  async handleAddComment(args: AddCommentInput): Promise<BaseToolResponse> {
+    try {
+      const client = this.verifyAuth();
+      this.validateRequiredParams(args, ["issueId", "body"]);
+
+      const result = (await client.addComment(args)) as AddCommentResponse;
+
+      if (!result.commentCreate.success || !result.commentCreate.comment) {
+        throw new Error("Failed to add comment");
+      }
+
+      const comment = result.commentCreate.comment;
+      
+      return this.createResponse(
+        `Successfully added comment to issue\n` +
+        `Comment ID: ${comment.id}\n` +
+        `URL: ${comment.url}\n` +
+        `By: ${comment.user.displayName || comment.user.name}\n` +
+        `Created at: ${new Date(comment.createdAt).toLocaleString()}`
+      );
+    } catch (error) {
+      this.handleError(error, "add comment");
+    }
+  }
 }

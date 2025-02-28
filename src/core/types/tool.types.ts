@@ -404,4 +404,55 @@ export const toolSchemas = {
       required: ['issues'],
     },
   },
+
+  linear_add_comment: {
+    name: 'linear_add_comment',
+    description: 'Add a comment to an existing issue',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        issueId: {
+          type: 'string',
+          description: 'Issue ID to add comment to',
+        },
+        body: {
+          type: 'string',
+          description: 'Comment body content. Supports Markdown.',
+        },
+        parentId: {
+          type: 'string',
+          description: 'Parent comment ID for creating threaded replies',
+          optional: true,
+        },
+        createAsUser: {
+          type: 'string',
+          description: 'Name to display for the created comment',
+          optional: true,
+        },
+        displayIconUrl: {
+          type: 'string',
+          description: 'URL of the avatar to display for this comment',
+          optional: true,
+        }
+      },
+      required: ['issueId', 'body'],
+    },
+    examples: [
+      {
+        description: "Add a simple comment to an issue",
+        value: {
+          issueId: "issue-id-123",
+          body: "This is a comment with **markdown** support"
+        }
+      },
+      {
+        description: "Add a threaded reply to an existing comment",
+        value: {
+          issueId: "issue-id-123",
+          body: "This is a reply to another comment",
+          parentId: "comment-id-456"
+        }
+      }
+    ]
+  },
 };
