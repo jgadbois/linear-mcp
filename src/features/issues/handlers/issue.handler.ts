@@ -18,6 +18,7 @@ import {
   DeleteIssueResponse,
   AddCommentResponse,
   Issue,
+  UpdateIssueInputWithId,
 } from "../types/issue.types.js";
 import { TeamState } from "../../teams/types/team.types.js";
 
@@ -51,7 +52,8 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
           `Issue: ${issue.identifier}\n` +
           `Title: ${issue.title}\n` +
           `URL: ${issue.url}\n` +
-          `Project: ${issue.project ? issue.project.name : "None"}`
+          `Project: ${issue.project ? issue.project.name : "None"}` +
+          (issue.parent ? `\nParent: ${issue.parent.identifier}` : "")
       );
     } catch (error) {
       this.handleError(error, "create issue");
@@ -74,18 +76,19 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
         args.issues
       )) as CreateIssuesResponse;
 
-      if (!result.issueCreate.success) {
+      if (!result.issueBatchCreate.success || !result.issueBatchCreate.issues) {
         throw new Error("Failed to create issues");
       }
 
-      const createdIssues = result.issueCreate.issues as Issue[];
+      const createdIssues = result.issueBatchCreate.issues;
 
       return this.createResponse(
         `Successfully created ${createdIssues.length} issues:\n` +
           createdIssues
             .map(
               (issue) =>
-                `- ${issue.identifier}: ${issue.title}\n  URL: ${issue.url}`
+                `- ${issue.identifier}: ${issue.title}\n  URL: ${issue.url}` +
+                (issue.parent ? `\n  Parent: ${issue.parent.identifier}` : "")
             )
             .join("\n")
       );
@@ -277,16 +280,87 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
       }
 
       const comment = result.commentCreate.comment;
-      
+
       return this.createResponse(
         `Successfully added comment to issue\n` +
-        `Comment ID: ${comment.id}\n` +
-        `URL: ${comment.url}\n` +
-        `By: ${comment.user.displayName || comment.user.name}\n` +
-        `Created at: ${new Date(comment.createdAt).toLocaleString()}`
+          `Comment ID: ${comment.id}\n` +
+          `URL: ${comment.url}\n` +
+          `By: ${comment.user.displayName || comment.user.name}\n` +
+          `Created at: ${new Date(comment.createdAt).toLocaleString()}`
       );
     } catch (error) {
       this.handleError(error, "add comment");
+    }
+  }
+
+  /**
+   * Updates a single issue.
+   */
+  async handleUpdateIssue(
+    args: UpdateIssueInputWithId
+  ): Promise<BaseToolResponse> {
+    try {
+      const client = this.verifyAuth();
+      this.validateRequiredParams(args, ["id", "update"]);
+
+      // Handle state name instead of state ID
+      if (
+        args.update.stateId &&
+        typeof args.update.stateId === "string" &&
+        !args.update.stateId.match(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        )
+      ) {
+        // This looks like a state name, not a UUID
+        const stateName = args.update.stateId.toLowerCase();
+
+        // Get all teams to find the state
+        const teamsResponse = await client.getTeams();
+        const teams = teamsResponse.teams.nodes;
+
+        let stateId: string | undefined;
+
+        // Search through all teams and their states to find a matching state name
+        for (const team of teams) {
+          const matchingState = team.states.find(
+            (state: TeamState) => state.name.toLowerCase() === stateName
+          );
+
+          if (matchingState) {
+            stateId = matchingState.id;
+            break;
+          }
+        }
+
+        if (!stateId) {
+          throw new Error(
+            `Could not find state with name: ${args.update.stateId}`
+          );
+        }
+
+        // Replace the state name with the state ID
+        args.update.stateId = stateId;
+      }
+
+      const result = (await client.updateIssue(
+        args.id,
+        args.update
+      )) as UpdateIssuesResponse;
+
+      if (!result.issueUpdate.success) {
+        throw new Error("Failed to update issue");
+      }
+
+      const issue = result.issueUpdate.issue;
+
+      return this.createResponse(
+        `Successfully updated issue ${issue.identifier}\n` +
+          `Title: ${issue.title}\n` +
+          `URL: ${issue.url}\n` +
+          `State: ${issue.state?.name || "Unknown"}`
+      );
+    } catch (error) {
+      this.handleError(error, "update issue");
     }
   }
 }

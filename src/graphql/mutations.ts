@@ -1,7 +1,7 @@
 import { gql } from "graphql-tag";
 
-export const CREATE_ISSUES_MUTATION = gql`
-  mutation CreateIssues($input: [IssueCreateInput!]!) {
+export const CREATE_ISSUE_MUTATION = gql`
+  mutation CreateIssue($input: IssueCreateInput!) {
     issueCreate(input: $input) {
       success
       issue {
@@ -16,6 +16,38 @@ export const CREATE_ISSUES_MUTATION = gql`
         project {
           id
           name
+        }
+        parent {
+          id
+          identifier
+          title
+        }
+      }
+    }
+  }
+`;
+
+export const CREATE_ISSUES_MUTATION = gql`
+  mutation CreateIssues($input: [IssueCreateInput!]!) {
+    issueBatchCreate(input: { issues: $input }) {
+      success
+      issues {
+        id
+        identifier
+        title
+        url
+        team {
+          id
+          name
+        }
+        project {
+          id
+          name
+        }
+        parent {
+          id
+          identifier
+          title
         }
       }
     }

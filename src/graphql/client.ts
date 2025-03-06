@@ -54,9 +54,9 @@ export class LinearGraphQLClient {
 
   // Create single issue
   async createIssue(input: CreateIssueInput): Promise<CreateIssueResponse> {
-    const { CREATE_ISSUES_MUTATION } = await import("./mutations.js");
-    return this.execute<CreateIssueResponse>(CREATE_ISSUES_MUTATION, {
-      input: [input],
+    const { CREATE_ISSUE_MUTATION } = await import("./mutations.js");
+    return this.execute<CreateIssueResponse>(CREATE_ISSUE_MUTATION, {
+      input,
     });
   }
 
@@ -220,7 +220,7 @@ export class LinearGraphQLClient {
   // Add a comment to an issue
   async addComment(input: AddCommentInput): Promise<AddCommentResponse> {
     const { ADD_COMMENT_MUTATION } = await import("./mutations.js");
-    
+
     // Prepare the input for the GraphQL mutation
     const commentInput = {
       issueId: input.issueId,
@@ -228,8 +228,8 @@ export class LinearGraphQLClient {
       parentId: input.parentId,
     };
 
-    return this.execute<AddCommentResponse>(ADD_COMMENT_MUTATION, { 
-      input: commentInput 
+    return this.execute<AddCommentResponse>(ADD_COMMENT_MUTATION, {
+      input: commentInput,
     });
   }
 }

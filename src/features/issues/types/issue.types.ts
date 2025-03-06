@@ -11,6 +11,7 @@ export interface CreateIssueInput {
   assigneeId?: string;
   priority?: number;
   projectId?: string;
+  parentId?: string;
 }
 
 export interface CreateIssuesInput {
@@ -24,6 +25,11 @@ export interface UpdateIssueInput {
   priority?: number;
   projectId?: string;
   stateId?: string;
+}
+
+export interface UpdateIssueInputWithId {
+  id: string;
+  update: UpdateIssueInput;
 }
 
 export interface BulkUpdateIssuesInput {
@@ -89,6 +95,14 @@ export interface Issue {
   project?: {
     name: string;
   };
+  parent?: {
+    id: string;
+    identifier: string;
+    title: string;
+  };
+  state?: {
+    name: string;
+  };
 }
 
 export interface CreateIssueResponse {
@@ -99,9 +113,9 @@ export interface CreateIssueResponse {
 }
 
 export interface CreateIssuesResponse {
-  issueCreate: {
+  issueBatchCreate: {
     success: boolean;
-    issues: Issue[];
+    issues?: Issue[];
   };
 }
 
@@ -161,6 +175,7 @@ export interface AddCommentResponse {
 export interface IssueHandlerMethods {
   handleCreateIssue(args: CreateIssueInput): Promise<BaseToolResponse>;
   handleCreateIssues(args: CreateIssuesInput): Promise<BaseToolResponse>;
+  handleUpdateIssue(args: UpdateIssueInputWithId): Promise<BaseToolResponse>;
   handleBulkUpdateIssues(
     args: BulkUpdateIssuesInput
   ): Promise<BaseToolResponse>;
