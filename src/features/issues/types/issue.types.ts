@@ -45,6 +45,12 @@ export interface AddCommentInput {
   displayIconUrl?: string;
 }
 
+export interface GetCommentsInput {
+  issueId: string;
+  first?: number;
+  after?: string;
+}
+
 export interface SearchIssuesInput {
   query?: string;
   filter?: {
@@ -168,6 +174,18 @@ export interface AddCommentResponse {
   };
 }
 
+export interface GetCommentsResponse {
+  issue: {
+    comments: {
+      pageInfo: {
+        hasNextPage: boolean;
+        endCursor: string | null;
+      };
+      nodes: Comment[];
+    };
+  };
+}
+
 /**
  * Handler method types
  */
@@ -183,4 +201,5 @@ export interface IssueHandlerMethods {
   handleDeleteIssue(args: DeleteIssueInput): Promise<BaseToolResponse>;
   handleDeleteIssues(args: DeleteIssuesInput): Promise<BaseToolResponse>;
   handleAddComment(args: AddCommentInput): Promise<BaseToolResponse>;
+  handleGetComments(args: GetCommentsInput): Promise<BaseToolResponse>;
 }

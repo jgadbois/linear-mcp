@@ -53,6 +53,41 @@ export const SEARCH_ISSUES_QUERY = gql`
   }
 `;
 
+export const GET_COMMENTS_QUERY = gql`
+  query GetComments($issueId: String!, $first: Int, $after: String) {
+    issue(id: $issueId) {
+      comments(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          id
+          body
+          url
+          user {
+            name
+            displayName
+          }
+          createdAt
+          children {
+            nodes {
+              id
+              body
+              url
+              user {
+                name
+                displayName
+              }
+              createdAt
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const GET_TEAMS_QUERY = gql`
   query GetTeams {
     teams {

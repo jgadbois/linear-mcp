@@ -13,6 +13,8 @@ import {
   IssueBatchResponse,
   AddCommentInput,
   AddCommentResponse,
+  GetCommentsInput,
+  GetCommentsResponse,
 } from "../features/issues/types/issue.types.js";
 import {
   ProjectInput,
@@ -220,16 +222,19 @@ export class LinearGraphQLClient {
   // Add a comment to an issue
   async addComment(input: AddCommentInput): Promise<AddCommentResponse> {
     const { ADD_COMMENT_MUTATION } = await import("./mutations.js");
+    return this.execute<AddCommentResponse>(ADD_COMMENT_MUTATION, { input });
+  }
 
-    // Prepare the input for the GraphQL mutation
-    const commentInput = {
-      issueId: input.issueId,
-      body: input.body,
-      parentId: input.parentId,
-    };
-
-    return this.execute<AddCommentResponse>(ADD_COMMENT_MUTATION, {
-      input: commentInput,
+  async getComments(
+    issueId: string,
+    first: number = 50,
+    after?: string
+  ): Promise<GetCommentsResponse> {
+    const { GET_COMMENTS_QUERY } = await import("./queries.js");
+    return this.execute<GetCommentsResponse>(GET_COMMENTS_QUERY, {
+      issueId,
+      first,
+      after,
     });
   }
 }

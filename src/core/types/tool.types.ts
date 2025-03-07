@@ -527,4 +527,45 @@ export const toolSchemas = {
       },
     ],
   },
+
+  linear_get_comments: {
+    name: "linear_get_comments",
+    description: "Get comments from an issue",
+    inputSchema: {
+      type: "object",
+      properties: {
+        issueId: {
+          type: "string",
+          description: "Issue ID to get comments from",
+        },
+        first: {
+          type: "number",
+          description: "Number of comments to return (default: 50)",
+          optional: true,
+        },
+        after: {
+          type: "string",
+          description: "Cursor for pagination",
+          optional: true,
+        },
+      },
+      required: ["issueId"],
+    },
+    examples: [
+      {
+        description: "Get comments from an issue",
+        value: {
+          issueId: "issue-id-123",
+        },
+      },
+      {
+        description: "Get comments with pagination",
+        value: {
+          issueId: "issue-id-123",
+          first: 10,
+          after: "cursor-string",
+        },
+      },
+    ],
+  },
 };

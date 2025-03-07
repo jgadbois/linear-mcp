@@ -19,6 +19,8 @@ import {
   AddCommentResponse,
   Issue,
   UpdateIssueInputWithId,
+  GetCommentsInput,
+  GetCommentsResponse,
 } from "../types/issue.types.js";
 import { TeamState } from "../../teams/types/team.types.js";
 
@@ -361,6 +363,48 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
       );
     } catch (error) {
       this.handleError(error, "update issue");
+    }
+  }
+
+  /**
+   * Gets comments for an issue.
+   */
+  async handleGetComments(args: GetCommentsInput): Promise<BaseToolResponse> {
+    try {
+      const client = this.verifyAuth();
+      this.validateRequiredParams(args, ["issueId"]);
+
+      const result = (await client.getComments(
+        args.issueId,
+        args.first || 50,
+        args.after
+      )) as GetCommentsResponse;
+
+      if (!result.issue || !result.issue.comments) {
+        throw new Error("Failed to get comments or issue not found");
+      }
+
+      const comments = result.issue.comments.nodes;
+      const pageInfo = result.issue.comments.pageInfo;
+
+      // Format the response
+      let responseText = `Found ${comments.length} comments:\n\n`;
+
+      comments.forEach((comment, index) => {
+        responseText += `${index + 1}. Comment by ${
+          comment.user.displayName || comment.user.name
+        } (${new Date(comment.createdAt).toLocaleString()}):\n`;
+        responseText += `${comment.body}\n`;
+        responseText += `URL: ${comment.url}\n\n`;
+      });
+
+      if (pageInfo.hasNextPage) {
+        responseText += `\nThere are more comments available. Use 'after: "${pageInfo.endCursor}"' to fetch the next page.`;
+      }
+
+      return this.createResponse(responseText);
+    } catch (error) {
+      this.handleError(error, "get comments");
     }
   }
 }

@@ -80,6 +80,10 @@ export class HandlerFactory {
         handler: this.issueHandler,
         method: "handleAddComment",
       },
+      linear_get_comments: {
+        handler: this.issueHandler,
+        method: "handleGetComments",
+      },
 
       // Project tools
       linear_create_project_with_issues: {
